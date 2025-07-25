@@ -43,6 +43,12 @@ if range_col:
     matched_rows = df[df[range_col] == selected_range].reset_index(drop=True)
 else:
     matched_rows = df
+	# Show all available products for the selected range
+st.markdown("### 📋 Products Matching Selected Range")
+display_cols = [col for col in matched_rows.columns if not str(col).lower().startswith("unnamed")]
+st.dataframe(matched_rows[display_cols], use_container_width=True)
+
+
 
 # --- PRODUCT ROW SELECTION ---
 display_cols = [col for col in matched_rows.columns if "model" in col.lower() or "clear span" in col.lower()]
@@ -152,6 +158,7 @@ final = round(discounted + gst, 2)
 st.markdown("### 💰 Final Price Breakdown")
 st.write(f"**Base + Extras:** ₹{total_price:,.2f}")
 st.write(f"**Discount ({discount}%):** -₹{total_price - discounted:,.2f}")
+st.write(f"**Price After Discount:** ₹{discounted:,.2f}")
 st.write(f"**+18% GST:** ₹{gst:,.2f}")
 st.success(f"**Total Payable:** ₹{final:,.2f}")
 
@@ -160,6 +167,8 @@ if st.button("Add to Quote"):
     st.session_state.cart.append({
         "Product": selected_sheet,
         "Model": selected_product.get("Model", "N/A"),
+	"Base + Extras (₹)": total_price,
+    	"Discounted (₹)": discounted,
         "Final Price (₹)": final
     })
     st.success("Added to quote! You can now add another product.")
@@ -171,8 +180,12 @@ if len(st.session_state.cart) > 0:
         quote_df = pd.DataFrame(st.session_state.cart)
         st.markdown("### 🧾 Combined Quote")
         st.dataframe(quote_df)
-        total_all = quote_df["Final Price (₹)"].sum()
-        st.success(f"**Total for All Products: ₹{total_all:,.2f}**")
+
+        total_discounted = quote_df["Discounted (₹)"].sum()
+        total_final = quote_df["Final Price (₹)"].sum()
+
+        st.success(f"**Total (After Discount, Before GST): ₹{total_discounted:,.2f}**")
+        st.success(f"**Total Payable (incl. GST): ₹{total_final:,.2f}**")
 
     if st.button("Clear All Quotes"):
         st.session_state.cart = []
