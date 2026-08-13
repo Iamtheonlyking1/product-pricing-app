@@ -20,7 +20,7 @@ def clean_sheet(file_path, sheet_name):
     df = pd.read_excel(file_path, sheet_name=sheet_name)
     for col in df.columns:
         if isinstance(col, str) and col.strip().lower() in ['product name', 'variation']:
-            df[col] = df[col].fillna(method='ffill')
+            df[col] = df[col].ffill()
     if sheet_name.lower() == "portable gantry crane" and "Unnamed: 6" in df.columns:
         df = df.rename(columns={"Unnamed: 6": "Nylon Wheel Price"})
     return df
